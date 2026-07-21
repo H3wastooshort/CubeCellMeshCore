@@ -26,6 +26,7 @@ void initLed() {
 }
 
 void ledVextOn() {
+    if (powerSaveMode>1) return;
 #ifdef MC_SIGNAL_NEOPIXEL
     digitalWrite(Vext, LOW);
     delay(1);
@@ -33,6 +34,7 @@ void ledVextOn() {
 }
 
 void ledRxOn() {
+    if (powerSaveMode>1) return;
 #ifdef MC_SIGNAL_NEOPIXEL
     ledVextOn();
     pixels.setPixelColor(0, pixels.Color(0, 127, 0));  // Green
@@ -44,6 +46,7 @@ void ledRxOn() {
 }
 
 void ledTxOn() {
+    if (powerSaveMode>1) return;
 #ifdef MC_SIGNAL_NEOPIXEL
     ledVextOn();
     pixels.setPixelColor(0, pixels.Color(127, 0, 127));  // Viola (red + blue)
@@ -55,6 +58,7 @@ void ledTxOn() {
 }
 
 void ledRedSolid() {
+    if (powerSaveMode>1) return;
 #ifdef MC_SIGNAL_NEOPIXEL
     ledVextOn();
     pixels.setPixelColor(0, pixels.Color(127, 0, 0));  // Red
@@ -66,6 +70,7 @@ void ledRedSolid() {
 }
 
 void ledGreenBlink() {
+    if (powerSaveMode>1) return;
 #ifdef MC_SIGNAL_NEOPIXEL
     ledVextOn();
     pixels.setPixelColor(0, pixels.Color(0, 256, 0));  // Green bright
@@ -82,6 +87,7 @@ void ledGreenBlink() {
 }
 
 void ledBlueDoubleBlink() {
+    if (powerSaveMode>1) return;
 #ifdef MC_SIGNAL_NEOPIXEL
     ledVextOn();
     // First blink

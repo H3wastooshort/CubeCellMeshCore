@@ -87,10 +87,6 @@
 #define MC_DEEP_SLEEP_ENABLED   true
 #define MC_RX_BOOST_ENABLED     false
 
-// LED signaling
-#define MC_SIGNAL_NEOPIXEL      // Use NeoPixel for status
-//#define MC_SIGNAL_GPIO13      // Use GPIO13 LED (HTCC-AB02A)
-
 //=============================================================================
 // Debug output macros
 //=============================================================================

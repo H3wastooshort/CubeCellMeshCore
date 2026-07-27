@@ -2113,17 +2113,17 @@ uint32_t getPacketId(MCPacket* pkt) {
     return hash;
 }
 
-bool shouldForward(MCPacket* pkt) {
+char shouldForward(MCPacket* pkt) {
     bool isFlood = pkt->header.isFlood();
     bool isDirect = pkt->header.isDirect();
 
     if (!isFlood && !isDirect) {
-        return false;
+        return 'T';
     }
 
     // RSSI threshold: don't forward packets with very weak signal
     if (pkt->rssi < MC_MIN_RSSI_FORWARD) {
-        return false;
+        return 'w';
     }
 
     // Region filter for flood packets (MeshCore 1.10.0+)
@@ -2132,21 +2132,21 @@ bool shouldForward(MCPacket* pkt) {
             // TRANSPORT_FLOOD: check region map for matching transport code
             if (regionMap.getCount() > 0) {
                 if (!regionMap.findMatch(pkt, REGION_DENY_FLOOD)) {
-                    return false;
+                    return 'R';
                 }
             }
         } else {
             // Legacy FLOOD: check wildcard entry
             if (regionMap.getWildcard().flags & REGION_DENY_FLOOD) {
-                return false;
+                return 'r';
             }
         }
     }
 
     // DIRECT routing: check if we are the next hop (path[0] == our hash)
     if (isDirect) {
-        if (pkt->pathLen == 0) return false;
-        if (pkt->path[0] != nodeIdentity.getNodeHash()) return false;
+        if (pkt->pathLen == 0) return 's';
+        if (pkt->path[0] != nodeIdentity.getNodeHash()) return 'P';
     }
 
     // Don't forward packets specifically addressed to us
@@ -2155,20 +2155,20 @@ bool shouldForward(MCPacket* pkt) {
         payloadType == MC_PAYLOAD_REQUEST ||
         payloadType == MC_PAYLOAD_RESPONSE) {
         if (pkt->payloadLen > 0 && pkt->payload[0] == nodeIdentity.getNodeHash()) {
-            return false;
+            return 'A';
         }
     }
 
     // Check packet ID cache (dedup)
     uint32_t id = getPacketId(pkt);
     if (!packetCache.addIfNew(id)) {
-        return false;
+        return 'D';
     }
 
     // FLOOD: check path length and loop detection
     if (isFlood) {
         if (pkt->pathLen >= MC_MAX_PATH_SIZE - 1) {
-            return false;
+            return 'S';
         }
 
         // Loop detection with configurable strictness
@@ -2199,12 +2199,12 @@ bool shouldForward(MCPacket* pkt) {
             }
 
             if (occurrences >= maxOccurrences) {
-                return false;  // Loop detected
+                return 'L';  // Loop detected
             }
         }
     }
 
-    return true;
+    return 0;
 }
 
 //=============================================================================
@@ -3117,7 +3117,9 @@ void processReceivedPacket(MCPacket* pkt) {
     }
 
     // Check if we should forward
-    if (shouldForward(pkt)) {
+    char fwd_decision = shouldForward(pkt);
+    LOG(TAG_FWD "reject=%c\n\r",fwd_decision==0 ? '0' : fwd_decision);
+    if (fwd_decision==0) {
         // Rate limit forwarding
         if (!repeaterHelper.allowForward()) {
             statsRecordRateLimited();  // Persistent stats

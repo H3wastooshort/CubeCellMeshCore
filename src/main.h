@@ -361,7 +361,7 @@ void setupRadio();
 void startReceive();
 bool transmitPacket(MCPacket* pkt);
 void processReceivedPacket(MCPacket* pkt);
-bool shouldForward(MCPacket* pkt);
+char shouldForward(MCPacket* pkt);
 uint32_t generateNodeId();
 void calculateTimings();
 uint32_t calculatePacketAirtime(uint16_t packetLen);
